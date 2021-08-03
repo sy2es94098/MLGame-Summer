@@ -226,6 +226,6 @@ class Enemy_bullet_b(pygame.sprite.Sprite):
 
 
 #敵人不能彼此覆蓋到
-#Level 0: Enemy_m 3個, Enymy_s:3個  
-#Level 1: Enemy_m 3個, Enymy_s:3個, Enymy_b:2個
-#Level 2: Enemy_m 5個, Enymy_s:3個, Enymy_b:3個
+#Level 0: Enemy_m 3個, Enemy_s:3個  
+#Level 1: Enemy_m 3個, Enemy_s:3個, Enemy_b:2個 (Enemy_b要被擊中兩次才會死)
+#Level 2: Enemy_m 5個, Enemy_s:3個, Enemy_b:3個 (Enemy_b要被擊中兩次才會死)
