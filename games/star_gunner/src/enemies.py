@@ -76,9 +76,11 @@ class Enemy_s(pygame.sprite.Sprite): #small enemy:前方1種彈道
             self.level = 2
             self.speedy = random.choice((-7,-8,-9,7,8,9))
     
-    def shoot(self, count: int = 5, speed: int = 5):
+    def shoot(self, count: int = 5, gap: int = 0, speed: int = 5):
+        sum = 0
         for i in range(count):
-            enemy_bullet = Enemy_bullet_s(self.rect.centerx, self.rect.bottom+5, speed)
+            enemy_bullet = Enemy_bullet_s(self.rect.centerx, self.rect.bottom+sum, speed)
+            sum += gap
 
     def update(self):
         if self.rect.y < 250: #路線直的之後斜的
@@ -89,11 +91,11 @@ class Enemy_s(pygame.sprite.Sprite): #small enemy:前方1種彈道
             self.rect.x += self.speedx
             self.rect.y += self.speedy
         if self.level == 0:
-            self.shoot(5,4)
+            self.shoot(5, 7, 4)
         elif self.level == 1:
-            self.shoot(10,7)
+            self.shoot(10, 7, 7)
         else:
-            self.shoot(10,10)
+            self.shoot(10, 7, 10)
 
         if self.rect.bottom > Height:
             self.kill()
@@ -161,21 +163,23 @@ class Enemy_b(pygame.sprite.Sprite): #big enemy:前方三種彈道
             self.level = 2
             self.speedy = random.randrange(5,7)
 
-    def shoot(self, count: int = 5, speed: int = 5):
+    def shoot(self, count: int = 5, gap: int = 0, speed: int = 5):
+        sum = 0
         for i in range(count):
-            enemy_bullet = Enemy_bullet_b(self.rect.centerx, self.rect.bottom+5, speed)
-            enemy_bullet = Enemy_bullet_b(self.rect.centerx+self.widtth/2, self.rect.bottom+5, speed)
-            enemy_bullet = Enemy_bullet_b(self.rect.centerx-self.widtth/2, self.rect.bottom+5, speed)
+            enemy_bullet = Enemy_bullet_b(self.rect.centerx, self.rect.bottom+sum, speed)
+            enemy_bullet = Enemy_bullet_b(self.rect.centerx+self.widtth/2, self.rect.bottom+sum, speed)
+            enemy_bullet = Enemy_bullet_b(self.rect.centerx-self.widtth/2, self.rect.bottom+sum, speed)
+            sum += gap
     
     def update(self):
         if self.level == 1:
             self.rect.x += self.speedx
             self.rect.y += self.speedy
-            self.shoot(5,9)
+            self.shoot(5, 10, 9)
         elif self.level == 2:
             self.rect.x += self.speedx
             self.rect.y += self.speedy
-            self.shoot(10,14)
+            self.shoot(10, 10, 14)
         
         if self.rect.bottom > Height:
             self.kill()
