@@ -82,7 +82,7 @@ class Enemy_s(pygame.sprite.Sprite): #small enemy:前方1種彈道
             self.speedy = random.randrange(4,6)
         elif level == "HARD":
             self.level = 2
-            self.speedy = random.randrange(7,9)
+            self.speedy = random.choice((-7,-8,-9,7,8,9))
     
     def shoot(self, count: int = 5, speed: int = 5):
         for i in range(count):
