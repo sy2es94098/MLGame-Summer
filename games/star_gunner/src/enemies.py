@@ -3,23 +3,13 @@ import pygame
 
 FPS = 60
 
-Gray_blue = (85,130,139)
-Army_green = (90,118,69)
-Army_dark_green = (52,85,1)
-Gray = (179,179,179)
-Black = (0,0,0)
-Red = (147,31,29)
-Yellow = (202,133,24)
-
-
-"""設定視窗"""
-Width, Height = 480, 600
-screen = pygame.display.set_mode((Width, Height)) 
-
-"""建立畫布bg"""
-bg = pygame.Surface(screen.get_size()) 
-bg = bg.convert() #convert()建立副本, 加快畫布在視窗顯示速度
-bg.fill(Black)
+Gray_blue = "#50828b"
+Army_green = "#5a7645"
+Army_dark_green = "#345501"
+Gray = "#b3b3b3"
+Black = "#000000"
+Red = "#931f1d"
+Yellow = "#ca8518"
 
 
 """ Game objects """
@@ -29,6 +19,7 @@ class Enemy_m(pygame.sprite.Sprite): #meteor隕石
         self.image = pygame.Surface([30,30]) #創建物件的畫布
         self.image.fill(Black)
         pygame.draw.circle(self.image,Gray,(15,15),15,0) #畫布,顏色,(x,y座標),半徑,實心
+        self.color = Gray
         self.rect = self.image.get_rect() #取得畫布
         self.rect.x = random.randrange(0,Width-self.rect.width)
         self.rect.y = random.randrange(-100,-50)
