@@ -31,7 +31,7 @@ class Enemy_m(pygame.sprite.Sprite): #meteor隕石
         pygame.draw.circle(self.image,Gray,(15,15),15,0) #畫布,顏色,(x,y座標),半徑,實心
         self.rect = self.image.get_rect() #取得畫布
         self.rect.x = random.randrange(0,Width-self.rect.width)
-        self.rect.y = 0
+        self.rect.y = random.randrange(-100,-50)
         self.level = 0
         self.speedx = 0
         if level == "EASY":
@@ -71,7 +71,7 @@ class Enemy_s(pygame.sprite.Sprite): #small enemy:前方1種彈道
         pygame.draw.rect(self.image, Army_green, [0,0,25,35], 0)
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(0,Width-self.rect.width)
-        self.rect.y = 0
+        self.rect.y = random.randrange(-120,-60)
         self.speedx = 0
         self.level = 0
         if level == "EASY":
@@ -155,7 +155,7 @@ class Enemy_b(pygame.sprite.Sprite): #big enemy:前方三種彈道
         pygame.draw.rect(self.image, Army_dark_green, [0,0,35,35], 0)
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(0, Width-self.rect.width)
-        self. rect.y = 0
+        self.rect.y = random.randrange(-120,-60)
         self.speedx = 0
         self.level = 0
         if level == "EASY":
