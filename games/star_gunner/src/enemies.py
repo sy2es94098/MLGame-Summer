@@ -60,6 +60,7 @@ class Enemy_s(pygame.sprite.Sprite): #small enemy:前方1種彈道
         self.image = pygame.Surface([25,35])
         self.image.fill(Black)
         pygame.draw.rect(self.image, Army_green, [0,0,25,35], 0)
+        self.color = Aymy_green
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(0,Width-self.rect.width)
         self.rect.y = random.randrange(-120,-60)
@@ -116,6 +117,7 @@ class Enemy_bullet_s(pygame.sprite.Sprite):
         self.image = pygame.Surface([5,5])
         self.image.fill(Black)
         pygame.draw.rect(self.image,Red,[0,0,5,5],0)
+        self.color = Red
         self.rect = self.image.get_rect()
         self.rect.centerx = x
         self.rect.bottom = y
@@ -144,6 +146,7 @@ class Enemy_b(pygame.sprite.Sprite): #big enemy:前方三種彈道
         self.image = pygame.Surface([35,35])
         self.image.fill(Black)
         pygame.draw.rect(self.image, Army_dark_green, [0,0,35,35], 0)
+        self.color = Army_dark_green
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(0, Width-self.rect.width)
         self.rect.y = random.randrange(-120,-60)
@@ -193,6 +196,7 @@ class Enemy_bullet_b(pygame.sprite.Sprite):
         self.image = pygame.Surface([7,7])
         self.image.fill(Black)
         pygame.draw.rect(self.image, Yellow, [0,0,7,7],0)
+        self.color = Yellow
         self.rect = self.image.get.rect()
         self.rect.centerx = x
         self.rect.bottom = y
