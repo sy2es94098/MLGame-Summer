@@ -9,7 +9,7 @@ import sys
 import random
 import numpy as np
 from collections import deque
-import mlgame.global_variable as gv
+#import mlgame.global_variable as gv
 
 import json
 #from keras.initializers import normal, identity
@@ -70,12 +70,57 @@ class MLPlay:
         self.actions = ["LEFT", "RIGHT"]
         self.t = 0
         self.fist = True
+        self.pixels = np.zeros(360000, dtype=np.int)
         if LOAD:
             print ("Now we load weight")
             self.model.load_weights("model.h5")
             adam = Adam(lr=LEARNING_RATE)
             self.model.compile(loss='mse',optimizer=adam)
             print ("Weight load successfully")    
+
+    def convert_rgb(self, hex_s):
+        data = []
+        for i in range(3):
+            hex = "0x" + hex_s[2*i+1:2*i+3]
+            num = int(hex,16)
+            data.append(num)
+        return sum(data)
+
+    def fill_rect_pixels(self, data):
+        init_coor = data['y'] * 600 + data['x']
+        c = ""
+        try:    
+            c = self.convert_rgb(data['color'])
+        except:
+            c = self.convert_rgb("#AAAAAA")
+        for i in range(data["height"]):
+            for j in range(data["width"]):
+                try:
+                    self.pixels[i*600 + init_coor+j] = c
+                except:
+                    pass
+
+    def get_pixels(self,info):
+        self.pixels = np.zeros(360000, dtype=np.int)
+        self.fill_rect_pixels(info['player'])
+        try:
+            self.fill_rect_pixels(info['boss'])
+        except:
+            pass
+
+        for e in info["enemies"]:
+            self.fill_rect_pixels(e)
+
+        for b in info["bullets"]:
+            self.fill_rect_pixels(b)
+
+        for m in info["meteor"]:
+            self.fill_rect_pixels(m)
+
+        for p in info["props"]:
+            self.fill_rect_pixels(p)
+
+        return self.pixels
 
 
     def update(self, scene_info: dict):
@@ -90,16 +135,14 @@ class MLPlay:
             epsilon = INITIAL_EPSILON
         # print("AI received data from game :", scene_info)
         #print(scene_info[0]['pixels'])
-
-        if scene_info[0]['pixels'] == []:
+        if scene_info[0] == []:
             return
     
         if self.fist:
-            x_t = scene_info[0]['pixels']
+            x_t = self.get_pixels(scene_info[0])
             x_t = np.array(x_t)
-            x_t = np.reshape(x_t,(600, 600, 3))
+            x_t = np.reshape(x_t,(600, 600))
 
-            x_t = skimage.color.rgb2gray(x_t)
             x_t = skimage.transform.resize(x_t,(80,80))
             x_t = skimage.exposure.rescale_intensity(x_t,out_range=(0,255))
 
@@ -120,7 +163,7 @@ class MLPlay:
         
             if self.t % FRAME_PER_ACTION == 0:
                 if random.random() <= epsilon:
-                    print("----------Random Action----------")
+                    #print("----------Random Action----------")
                     action_index = random.randrange(ACTIONS)
                     a_t = action_index
                 else:
@@ -136,13 +179,11 @@ class MLPlay:
             #run the selected action and observed next state and reward
 
 
-            x_t1_colored = scene_info[0]['pixels']
-            x_t1_colored = np.array(x_t1_colored)
-            x_t1_colored = np.reshape(x_t1_colored,(600, 600, 3))
+            x_t1 = self.get_pixels(scene_info[0])
 
-            print(x_t1_colored.shape)
+            x_t1 = np.array(x_t1)
+            x_t1 = np.reshape(x_t1,(600, 600))
 
-            x_t1 = skimage.color.rgb2gray(x_t1_colored)
             x_t1 = skimage.transform.resize(x_t1,(80,80))
             x_t1 = skimage.exposure.rescale_intensity(x_t1, out_range=(0, 255))
             x_t1 = x_t1 / 255.0
@@ -205,21 +246,3 @@ class MLPlay:
         """
         print("reset ml script")
         pass
-'''
-    def trainNetwork(self,model,args):
-        do_nothing = random.sample(self.actions, 1)
-        # get the first state by doing nothing and preprocess the image to 80x80x4
-
-        x_t, r_0, terminal = game_state.frame_step(do_nothing)
-
-        x_t = skimage.color.rgb2gray(x_t)
-        x_t = skimage.transform.resize(x_t,(80,80))
-        x_t = skimage.exposure.rescale_intensity(x_t,out_range=(0,255))
-
-        x_t = x_t / 255.0
-
-        s_t = np.stack((x_t, x_t, x_t, x_t), axis=2)
-        #print (s_t.shape)
-
-        #In Keras, need to reshape
-        s_t = s_t.reshape(1, s_t.shape[0], s_t.shape[1], s_t.shape[2])  #1*80*80*4'''

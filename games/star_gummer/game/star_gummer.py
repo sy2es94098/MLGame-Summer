@@ -45,7 +45,7 @@ class Star_Gummer(PaiaGame):
             self.level = 2
         self.props = []
         self.reward = 0
-        self.pixels = []
+        #self.pixels = []
 
     def update(self, commands):
         self.frame_count += 1
@@ -165,12 +165,12 @@ class Star_Gummer(PaiaGame):
         player_info = self.player.get_info()
         data =create_rect_view_data("player", player_info["pos"][0], player_info["pos"][1],player_info["size"][0], player_info["size"][1], "#FFFFF0")
         try:
-            to_players_data = {'1P' : [{"pixels":self.pixels, "player": data,
+            to_players_data = {'1P' : [{"player": data,
             "reward": self.reward, "frames": self.frame_count, "state": self.get_game_status(),
             "enemies":self.return_enemy,"meteor":self.return_meteor,"bullets":self.return_bullet,
             "boss":self.boss.game_object_data, 'props' : self.return_props}]}
         except:
-            to_players_data = {'1P' : [{"pixels":self.pixels, "player": data,
+            to_players_data = {'1P' : [{"player": data,
             "reward": self.reward, "frames": self.frame_count,"state": self.get_game_status(),
             "enemies":self.return_enemy,"meteor":self.return_meteor,"bullets":self.return_bullet,
             "boss":[], 'props' : self.return_props}]}

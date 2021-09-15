@@ -91,8 +91,8 @@ class PygameView():
             # object should not be shifted
             self.draw_game_obj_according_type(game_object)
 
-        pixel = self.return_pixels()
-        gv.set_value(pixel)
+        #pixel = self.return_pixels()
+        #gv.set_value(pixel)
         
         
 
