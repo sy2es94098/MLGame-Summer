@@ -1,7 +1,9 @@
 import math
 import time
 import pygame
+import mlgame.global_variable as gv
 
+import os
 LINE = "line"
 
 TEXT = "text"
@@ -16,6 +18,7 @@ RECTANGLE = "rect"
 POLYGON = "polygon"
 
 
+
 def trnsfer_hex_to_rgb(hex):
     h = hex.lstrip('#')
     return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
@@ -23,6 +26,8 @@ def trnsfer_hex_to_rgb(hex):
 
 class PygameView():
     def __init__(self, game_info: dict):
+        #os.environ['SDL_VIDEODRIVER']='dummy'
+
         pygame.display.init()
         pygame.font.init()
         self.scene_init_data = game_info
@@ -53,6 +58,14 @@ class PygameView():
                     result[file["image_id"]] = image
         return result
 
+    
+    def return_pixels(self):
+        Pixels = []
+        for i in range(self.width):
+            for j in range(self.height):
+                Pixels.append(self.screen.get_at((i, j))[:3])
+        return Pixels
+
     def draw(self, object_information):
         '''
         每個frame呼叫一次，把角色畫在螢幕上
@@ -77,6 +90,11 @@ class PygameView():
         for game_object in object_information["foreground"]:
             # object should not be shifted
             self.draw_game_obj_according_type(game_object)
+
+        pixel = self.return_pixels()
+        gv.set_value(pixel)
+        
+        
 
     def draw_game_obj_according_type(self, game_object):
         if game_object[TYPE] == IMAGE:
