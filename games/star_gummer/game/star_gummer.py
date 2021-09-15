@@ -11,6 +11,9 @@ from mlgame.view.test_decorator import check_game_progress, check_game_result
 from mlgame.view.view_model import create_text_view_data, create_asset_init_data, create_image_view_data, create_rect_view_data,Scene
 from os import path
 from .setting import *
+import numpy as np
+import mlgame.global_variable as gv
+
 
 ASSET_PATH = path.join(path.dirname(__file__), "../assets")
 
@@ -33,6 +36,7 @@ class Star_Gummer(PaiaGame):
         self.return_enemy = []
         self.return_meteor = []
         self.return_props = []
+        #self.pixels = np.zeros(360000, dtype=np.float)
         if level == "EASY":
             self.level = 0
         elif level == "NORMAL":
@@ -40,15 +44,21 @@ class Star_Gummer(PaiaGame):
         elif level == "HARD":
             self.level = 2
         self.props = []
+        self.reward = 0
+        self.pixels = []
 
     def update(self, commands):
         self.frame_count += 1
+        self.pixels = gv.pixels
+        get_buff = False
+        get_hit = False
         if self.frame_count % 300 == 0:
             buff = random.choice([RecoverBuff(), WSPBuff(), AttackBuff(), RangeBuff()])
             self.props.append(Prop(random.randint(0, WIDTH), random.randint(0, HEIGHT), buff))
         for prop in self.props:
             if prop.is_collide(self.player):
                 prop.buff.buff(self.player)
+                get_buff = True
                 self.props.remove(prop)
 
         if self.frame_count % 100 == 0:
@@ -98,16 +108,26 @@ class Star_Gummer(PaiaGame):
             hits = pygame.sprite.spritecollide(self.boss, self.player.bullets, True)
             for hit in hits:
                 self.boss.hp -= 1
+                get_hit = True
         
         hits = pygame.sprite.spritecollide(self.player, self.enemy_m, True)
         for hit in hits:
-            print(self.player.hp)
+            #print(self.player.hp)
             self.player.hp -= 1
+            get_hit = True
+            #self.reward = -1
 
         self.bullets.update()
         pygame.sprite.groupcollide(self.player.bullets, self.enemies, True, True)
         self.recycle(self.bullets)
         self.collect_return_data()
+
+        if get_hit:
+            self.reward = -1
+        elif get_buff:
+            self.reward = 0.5
+        else:
+            self.reward = 0.1
 
         if not self.is_running:
             return "QUIT"
@@ -125,28 +145,33 @@ class Star_Gummer(PaiaGame):
         self.return_bullet = []
         self.return_props = []
         for enemy in self.enemies:
-            self.return_enemy.append([enemy.game_object_data['x'],enemy.game_object_data['y']])
+            self.return_enemy.append(enemy.game_object_data)
 
         for enemy in self.enemy_m:
-            self.return_meteor.append([enemy.game_object_data['x'],enemy.game_object_data['y']])
+            self.return_meteor.append(enemy.game_object_data)
 
         for bullet in self.bullets:
-            self.return_bullet.append([bullet.game_object_data['x'],bullet.game_object_data['y']])
+            self.return_bullet.append(bullet.game_object_data)
 
         for prop in self.props:
-            self.return_props.append([prop.rect[0], prop.rect[1]])
+            self.return_props.append(create_rect_view_data("prop", prop.rect[0], prop.rect[1],
+                                      PROP_SIZE[0], PROP_SIZE[1], GREEN))
 
     def game_to_player_data(self):
         """
         send something to game AI
         we could send different data to different ai
         """
+        player_info = self.player.get_info()
+        data =create_rect_view_data("player", player_info["pos"][0], player_info["pos"][1],player_info["size"][0], player_info["size"][1], "#FFFFF0")
         try:
-            to_players_data = {'1P' : [{"frames": self.frame_count, "state": self.game_result_state,"player":[self.player.rect.centerx,self.player.rect.centery],
+            to_players_data = {'1P' : [{"pixels":self.pixels, "player": data,
+            "reward": self.reward, "frames": self.frame_count, "state": self.get_game_status(),
             "enemies":self.return_enemy,"meteor":self.return_meteor,"bullets":self.return_bullet,
-            "boss":[self.boss.rect.centerx,self.boss.rect.centery], 'props' : self.return_props}]}
+            "boss":self.boss.game_object_data, 'props' : self.return_props}]}
         except:
-            to_players_data = {'1P' : [{"frames": self.frame_count,"state": self.game_result_state,"player":[self.player.rect.centerx,self.player.rect.centery],
+            to_players_data = {'1P' : [{"pixels":self.pixels, "player": data,
+            "reward": self.reward, "frames": self.frame_count,"state": self.get_game_status(),
             "enemies":self.return_enemy,"meteor":self.return_meteor,"bullets":self.return_bullet,
             "boss":[], 'props' : self.return_props}]}
 
@@ -156,21 +181,48 @@ class Star_Gummer(PaiaGame):
 
         return to_players_data
 
+    def write_result(self,file,res):
+        with open(file,'a') as f:
+            f.write(res + "\n")
+
     def get_game_status(self):
-        if self.is_running:
+        if self.game_alive():
             status = GameStatus.GAME_ALIVE
         elif self.player.hp  > 0:
             status = GameStatus.GAME_PASS
+            self.write_result(path.join("./","result.txt"),"1")
+            self.reward = 5
+            self.reset()
         else:
             status = GameStatus.GAME_OVER
+            self.write_result(path.join("./","result.txt"),"0")
+            self.reward = -5
+            self.reset()
         return status
 
     def reset(self):
-        pass
-        
+        del self.player
+        del self.boss
+        del self.enemy_m
+        del self.enemies
+        del self.bullets
 
-    @property
-    def is_running(self):
+        self.game_result_state = GameResultState.FAIL
+        self.frame_count = 0
+        self.player = Player(self)
+        self.boss = None
+        self.encounter = False
+        self.enemy_m = pygame.sprite.Group()
+        self.enemies = pygame.sprite.Group()
+        self.level = 0
+        self.bullets = pygame.sprite.Group()
+        self.return_bullet = []
+        self.return_enemy = []
+        self.return_meteor = []
+        self.return_props = []
+        self.props = []
+        
+    def game_alive(self):
         if self.player.hp <=0:
             return False
         try:
@@ -178,6 +230,10 @@ class Star_Gummer(PaiaGame):
                 return False
         except Exception:
             pass
+        return True
+
+    @property
+    def is_running(self):
         return True
     
     def conf_img(self, relate_path, name, width, height):
@@ -232,7 +288,7 @@ class Star_Gummer(PaiaGame):
         }
         player_info = self.player.get_info()
         scene_progress["object_list"].append(create_rect_view_data("player", player_info["pos"][0], player_info["pos"][1],
-                                                                   player_info["size"][0], player_info["size"][1], RED))
+                                                                   player_info["size"][0], player_info["size"][1], "#FFFFF0"))
         for bullet in player_info["bullets_pos"]:
             scene_progress["object_list"].append(
                 create_rect_view_data("bullet", bullet[0], bullet[1],

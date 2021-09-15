@@ -38,7 +38,7 @@ class Player(pygame.sprite.Sprite):
     def get_info(self):
         player_info = {
             "pos":(self.rect.x, self.rect.y),
-            "color":RED,
+            "color":"#FFFFF0",
             "size":(self.rect.width, self.rect.height),
             "bullets_pos":[],
         }

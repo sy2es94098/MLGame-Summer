@@ -1,9 +1,57 @@
 import random
+import numpy as np
 
 class MLPlay:
     def __init__(self):
         print("Initial ml script")
         self.tik = False
+        self.pixels = np.zeros(360000, dtype=np.float)
+
+
+    def convert_rgb(self, hex_s):
+        data = []
+        for i in range(3):
+            hex = "0x" + hex_s[2*i+1:2*i+3]
+            num = int(hex,16)
+            data.append(num)
+        return sum(data)
+
+    def fill_rect_pixels(self, data):
+        init_coor = data['y'] * 600 + data['x']
+        c = ""
+        try:    
+            c = self.convert_rgb(data['color'])
+        except:
+            c = self.convert_rgb("#AAAAAA")
+        for i in range(data["height"]):
+            for j in range(data["width"]):
+                try:
+                    self.pixels[i*600 + init_coor+j] = c
+                except:
+                    pass
+
+    def get_pixels(self,info):
+        self.pixels = np.zeros(360000, dtype=np.int)
+
+        self.fill_rect_pixels(info['player'])
+        try:
+            self.fill_rect_pixels(info['boss'])
+        except:
+            print("no boss")
+
+        for e in info["enemies"]:
+            self.fill_rect_pixels(e)
+
+        for b in info["bullets"]:
+            self.fill_rect_pixels(b)
+
+        for m in info["meteor"]:
+            self.fill_rect_pixels(m)
+
+        for p in info["props"]:
+            self.fill_rect_pixels(p)
+        return self.pixels
+            
 
     def update(self, scene_info: dict):
         """
@@ -12,6 +60,12 @@ class MLPlay:
         # print("AI received data from game :", scene_info)
         actions = ["SPEED", "BRAKE", "LEFT", "RIGHT"]
         up_down = ["SPEED", "BRAKE"]
+        #print(scene_info[0])
+        x_t = self.get_pixels(scene_info[0])
+        print(x_t.shape)
+        x_t = np.reshape(x_t,(600, 600))
+
+        '''
         obstacle = []
         obstacle.extend(scene_info[0]['bullets'])
         obstacle.extend(scene_info[0]['meteor'])
@@ -115,6 +169,7 @@ class MLPlay:
                     return "BRAKE"
                 else:    
                     return "SPEED"
+        '''
 
     def reset(self):
         """

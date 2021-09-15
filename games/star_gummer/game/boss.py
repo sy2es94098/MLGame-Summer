@@ -109,7 +109,7 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self, group, x, y, dir, speed_up_y:int = 0, speed: int = 10.5):
         pygame.sprite.Sprite.__init__(self, group)
         self.image = pygame.Surface([8, 8])
-        self.color = "#FF0000"
+        self.color = "#FF90A0"
         self.rect = self.image.get_rect()
         self.rect.centerx = x
         self.rect.centery = y
